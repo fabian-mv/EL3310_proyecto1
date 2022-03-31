@@ -4,4 +4,5 @@ _start:
 	LDR r0, ='!'
 	BL  uart_send
 	.halt:
+	WFI
 	B   .halt
