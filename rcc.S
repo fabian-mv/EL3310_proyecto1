@@ -49,6 +49,10 @@
 .equ RCC_CFGR_PLLSRC, 1 << 16
 .equ RCC_CFGR_SWS,    0b11 << 2
 
+# p. 112
+.equ RCC_APB2ENR_OFFSET,   0x18
+.equ RCC_APB2ENR_USART1EN, 1 << 14
+
 # Multiplicador de PLL de 9 (7 + 2) para pasar de 8MHz a 72MHz (p. 102).
 .equ PLLMUL, 0b0111 << 18
 
@@ -120,5 +124,9 @@ rcc_init:
 	AND r1, r2
 	CMP r1, #SWS_PLL
 	BNE .sysclk_is_hsi
+
+	# Provee señal de reloj a USART1 (esto no configura UART, ver usart.S)
+	LDR r1, =RCC_APB2ENR_USART1EN
+	STR r1, [r0, #RCC_APB2ENR_OFFSET]
 
 	BX  lr
