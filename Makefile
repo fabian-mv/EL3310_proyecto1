@@ -11,5 +11,5 @@ clean:
 firmware: interrupt.o start.o rcc.o uart.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-%.o: %.s
+%.o: %.S
 	$(CC) $(CFLAGS) $(ASFLAGS) -c -o $@ $<
