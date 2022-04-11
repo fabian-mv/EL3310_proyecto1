@@ -8,7 +8,7 @@ all: firmware
 clean:
 	rm -f firmware *.o
 
-firmware: interrupt.o start.o uart.o
+firmware: interrupt.o start.o rcc.o uart.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 %.o: %.s
