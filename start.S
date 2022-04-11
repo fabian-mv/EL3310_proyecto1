@@ -2,8 +2,11 @@
 _start:
 	BL  rcc_init
 	BL  uart_init
-	LDR r0, ='!'
-	BL  uart_send
-	.halt:
-	WFI
-	B   .halt
+
+	LDR r0, =text
+	BL  uart_send_str
+
+	B   halt
+
+.section .rodata
+text: .asciz "!\n"

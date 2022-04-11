@@ -50,8 +50,23 @@ uart_init:
 	STR r1, [r0, #USART_CR1_OFFSET]
 	BX  lr
 
-.global uart_send
-uart_send:
+.global uart_send_str
+uart_send_str:
+	PUSH {r4, lr}
+	MOV  r4, r0
+
+	.send_bytes:
+	LDRB r0, [r4]
+	CBZ  r0, .send_bytes.end
+	BL   uart_send_char
+	ADD  r4, r4, #1
+	B    .send_bytes
+	.send_bytes.end:
+
+	POP  {r4, pc}
+
+.global uart_send_char
+uart_send_char:
 	LDR r1, =0xff
 	AND r0, r0, r1
 	LDR r1, =usart_dr_mask
