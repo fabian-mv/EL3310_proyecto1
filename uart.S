@@ -14,7 +14,7 @@
 
 # El registro BRR contiene una escala fraccional de punto fijo llamada USARTDIV,
 # documentada en p. 617. USARTDIV ajusta el divisor de reloj aplicado a f_PCLK
-# (reloj de core/APB) antes de sobremuestrar. Esta implementación configura
+# (reloj de APB) antes de sobremuestrar. Esta implementación configura
 # USART1 con un factor de sobremuestro de 16, y además f_PCLK es 24MHz según la
 # tabla 8 de la datasheet del STM32F100RB (p. 34). Buscamos un baud rate estándar
 # de 115200 bauds, así que
@@ -23,7 +23,14 @@
 # 
 # Así que la mantisa es 13 y la fracción es 0/16. La tabla 127 del manual (p.
 # 621) verifica este valor.
-.equ USARTDIV, 13 << 4
+#
+# Nota: Para STM32F103xx (lo que tenemos) USART1 está en APB2 (72MHz, ver rcc.S
+# p. 799 de RM0008), por lo que se triplica.
+#ifdef QEMU
+	.equ USARTDIV, 13 << 4
+#else
+	.equ USARTDIV, 39 << 4
+#endif 
 
 .global uart_init
 uart_init:
