@@ -29,7 +29,7 @@
 #ifdef QEMU
 	.equ USARTDIV, 13 << 4
 #else
-	.equ USARTDIV, 39 << 4
+	.equ USARTDIV, 39 << 4 | 0b0001 << 0
 #endif 
 
 .global uart_init
