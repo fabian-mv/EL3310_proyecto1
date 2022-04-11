@@ -2,11 +2,13 @@
 _start:
 	BL  rcc_init
 	BL  uart_init
+	BL  systick_init
 
+	.dbg_loop:
 	LDR r0, =text
 	BL  uart_send_str
-
-	B   halt
+	BL  systick_next
+	B   .dbg_loop
 
 .section .rodata
 text: .asciz "!\n"
