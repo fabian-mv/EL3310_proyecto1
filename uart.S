@@ -1,6 +1,8 @@
 # Base en p. 36, lo demás a partir de p. 640
-
 .equ USART1, 0x40013800
+
+# Mapa de memoria en p. 51 RM0008
+.equ GPIOA,  0x40010800
 
 .equ USART_SR_OFFSET, 0x00
 .equ USART_SR_TXE,    1 << 7
@@ -11,6 +13,13 @@
 .equ USART_CR1_OFFSET, 0x0c
 .equ USART_CR1_TE,     1 << 3
 .equ USART_CR1_UE,     1 << 13
+
+# P. 172
+.equ GPIO_CRH_OFFSET,     0x04
+.equ GPIO_CRH_CNF_MODE_9, 0b1111 << 4
+
+# PA9 en push-pull alternate function output
+.equ PA9_CNF_MODE, 0b1010 << 4
 
 # El registro BRR contiene una escala fraccional de punto fijo llamada USARTDIV,
 # documentada en p. 617. USARTDIV ajusta el divisor de reloj aplicado a f_PCLK
@@ -34,8 +43,17 @@
 
 .global uart_init
 uart_init:
-	LDR r0, =USART1
+	# Configura PA9 (TX) como alternate output push-pull. PA10 (RX)
+	# está bien en la configuración de reset (floating input).
+	LDR r0, =GPIOA
+	LDR r1, [r0, #GPIO_CRH_OFFSET]
+	LDR r2, =~GPIO_CRH_CNF_MODE_9
+	AND r1, r1, r2
+	LDR r2, =PA9_CNF_MODE
+	ORR r1, r1, r2
+	STR r1, [r0, #GPIO_CRH_OFFSET]
 
+	LDR r0, =USART1
 	LDR r1, [r0, #USART_DR_OFFSET]
 	# Preserva bits reservados. Nota: `AND` con inmediato no existe en Thumb
 	LDR r2, =~0xff

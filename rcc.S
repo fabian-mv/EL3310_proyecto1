@@ -54,6 +54,8 @@
 # p. 112
 .equ RCC_APB2ENR_OFFSET,   0x18
 .equ RCC_APB2ENR_USART1EN, 1 << 14
+.equ RCC_APB2ENR_IOPAEN,   1 << 2
+.equ RCC_APB2ENR_AFIOEN,   1 << 0
 
 # Multiplicador de PLL de 9 (7 + 2) para pasar de 8MHz a 72MHz (p. 102).
 .equ PLLMUL, 0b0111 << 18
@@ -128,7 +130,8 @@ rcc_init:
 	BNE .sysclk_is_hsi
 
 	# Provee señal de reloj a USART1 (esto no configura UART, ver usart.S)
-	LDR r1, =RCC_APB2ENR_USART1EN
+	# También da señal de reloj a GPIOA y AFIO.
+	LDR r1, =(RCC_APB2ENR_USART1EN | RCC_APB2ENR_IOPAEN | RCC_APB2ENR_AFIOEN)
 	STR r1, [r0, #RCC_APB2ENR_OFFSET]
 
 	BX  lr
