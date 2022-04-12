@@ -12,6 +12,8 @@
 #   las tarjetas con uCs STM32 ya traen un cristal de 8MHz aquí. El HSE es una
 #   fuente preferible al HSI.
 #
+# - LSI y LSE: Análogos de baja frecuencia (para RTC, etc).
+#
 # Un circuito adicional y relevante es un PLL que permite escalar hacia arriba
 # la frecuencia de el HSE o el HSI, lo cual permite llegar a frecuencias de
 # hasta 72MHz sin invertir en cristales más rápidos pero más caros.
