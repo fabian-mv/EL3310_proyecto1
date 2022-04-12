@@ -120,7 +120,7 @@ rcc_init:
 	STR r2, [r0, #RCC_CFGR_OFFSET]
 
 	# Se espera a que RCC confirme el cambio
-	LDR r2, =~RCC_CFGR_SWS
+	LDR r2, =RCC_CFGR_SWS
 	.sysclk_is_hsi:
 	LDR r1, [r0, #RCC_CFGR_OFFSET]
 	AND r1, r2
