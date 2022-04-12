@@ -54,5 +54,5 @@ systick_handler:
 
 .global halt
 halt:
-	WFI
+	#WFI
 	B halt

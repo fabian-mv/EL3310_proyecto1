@@ -51,7 +51,7 @@ systick_sleep:
 	LDR r0, [r3]
 	CMP r0, r2
 	BHS .sleep.end
-	WFI
+	#WFI
 	B   .sleep
 	.sleep.end:
 
