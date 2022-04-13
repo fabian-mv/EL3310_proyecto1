@@ -28,25 +28,30 @@ green_tmr:
 
 var: .word 20
 
-@R0-R3
+.global _start
+_start:
 
-.global main_flow
-main_flow:
+    LDR r4, =stpl_n_tmr
+    LDR r0 , [r4]
+    LDR r5, =stpl_o_tmr
+    LDR r1 , [r5]
+    BL compare_sptl
+    MOV r2,r0
+    LDR r4, =stpl_s_tmr
+    LDR r0 , [r4]
+    LDR r5, =stpl_e_tmr
+    LDR r1 , [r5]
+    BL compare_sptl
+    MOV r1,r2
+    BL compare_sptl
 
-
-    B .compare_sptl
-    .
-
-    .peatonal:
-
-    .
+    #SWI 0
 
 .global compare_sptl
 compare_sptl:
     
     CMP r0,r1
     IT lo
-    MOVLO r1,r0
-    B. 
-
+    MOVLO r0,r1
+    BX lr
     
