@@ -1,14 +1,6 @@
 .data
 stpl_n: 
-    .space 1		@ Reserve 1 byte for memory block “stpl_n”
-stpl_o:
-    .space 1		@ Reserve 1 byte for memory block “stpl_o”
-stpl_s:
-    .space 1		@ Reserve 1 byte for memory block “stpl_s”
-stpl_e:
-    .space 1		@ Reserve 1 byte for memory block “stpl_e”
-stpl_p:
-    .space 1		@ Reserve 1 byte for memory block “stpl_p”
+    .space 4		@ Reserve 1 byte for memory block “stpl”
 
 stpl_n_tmr: 
     .space 1		@ Reserve 1 byte for memory block “stpl_n_tmr”
@@ -28,8 +20,10 @@ green_tmr:
 
 var: .word 20
 
-.global _start
-_start:
+.text
+
+.global stpl_main
+stpl_main:
 
     LDR r4, =stpl_n_tmr
     LDR r0 , [r4]
@@ -44,8 +38,6 @@ _start:
     BL compare_sptl
     MOV r1,r2
     BL compare_sptl
-
-    #SWI 0
 
 .global compare_sptl
 compare_sptl:
