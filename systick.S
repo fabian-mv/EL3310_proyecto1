@@ -5,7 +5,7 @@
 # a ese manual si no se indica lo contrario.
 
 # p. 621 RM0008
-.equ SYST, 0xE000E010
+.equ SYST, 0xe000e010
 
 .equ SYST_CSR_OFFSET,  0x00
 .equ SYST_CSR_TICKINT, 1 << 1

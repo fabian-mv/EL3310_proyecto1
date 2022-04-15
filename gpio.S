@@ -111,3 +111,7 @@ gpio_set_green:
 	LDR r0, =GPIOA
 	STR r1, [r0, #GPIO_BSRR_OFFSET]
 	BX  lr
+
+.global gpio_isr
+gpio_isr:
+	BX lr
