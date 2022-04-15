@@ -6,13 +6,13 @@
 .equ GPIOC, 0x40011000
 
 # P. 171
-.equ GPIO_CRL_OFFSET,         0x00
-.equ GPIO_CRL_CNF_MODE_34567, 0xfff << 12
+.equ GPIO_CRL_OFFSET,               0x00
+.equ GPIO_CRL_CNF_MODE_34567_SHIFT, 12
 
 # P. 172
-.equ GPIO_CRH_OFFSET,      0x04
-.equ GPIO_CRH_CNF_MODE_9,  0b1111 << 4
-.equ GPIO_CRH_CNF_MODE_13, 0b1111 << 20
+.equ GPIO_CRH_OFFSET,            0x04
+.equ GPIO_CRH_CNF_MODE_9_SHIFT,  4
+.equ GPIO_CRH_CNF_MODE_13_SHIFT, 20
 
 .equ GPIO_IDR_OFFSET,      0x08
 .equ GPIO_IDR_34567_SHIFT, 3
@@ -29,14 +29,14 @@
 
 # P. 191
 .equ AFIO_EXTICR1_OFFSET, 0x08
-.equ AFIO_EXTICR2_OFFSET, 0x0C
+.equ AFIO_EXTICR2_OFFSET, 0x0c
 
 # P. 211
 .equ EXTI_IMR_OFFSET, 0x00
 .equ EXTI_IMR_34567,  0b11111 << 3
 
 # P. 212
-.equ EXTI_FTSR_OFFSET, 0x0C
+.equ EXTI_FTSR_OFFSET, 0x0c
 .equ EXTI_FTSR_34567,  0b11111 << 3
 
 # P. 213
@@ -63,8 +63,7 @@ gpio_init:
 	# PA4-PA7 son salidas de LEDs
 	LDR r0, =GPIOA
 	LDR r1, [r0, #GPIO_CRL_OFFSET]
-	LDR r2, =~GPIO_CRL_CNF_MODE_34567
-	AND r1, r1, r2
+	BFC r1, #GPIO_CRL_CNF_MODE_34567_SHIFT, #20
 	LDR r2, =PA34567_CNF_MODE
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRL_OFFSET]
@@ -76,8 +75,7 @@ gpio_init:
 	# Configura PA9 (TX) como alternate output push-pull. PA10 (RX)
 	# está bien en la configuración de reset (floating input).
 	LDR r1, [r0, #GPIO_CRH_OFFSET]
-	LDR r2, =~GPIO_CRH_CNF_MODE_9
-	AND r1, r1, r2
+	BFC r1, #GPIO_CRH_CNF_MODE_9_SHIFT, #4
 	LDR r2, =PA9_CNF_MODE
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRH_OFFSET]
@@ -85,8 +83,7 @@ gpio_init:
 	# PB3-PB7 son botones
 	LDR r0, =GPIOB
 	LDR r1, [r0, #GPIO_CRL_OFFSET]
-	LDR r2, =~GPIO_CRL_CNF_MODE_34567
-	AND r1, r1, r2
+	BFC r1, #GPIO_CRL_CNF_MODE_34567_SHIFT, #20
 	LDR r2, =PB34567_CNF_MODE
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRL_OFFSET]
@@ -99,8 +96,7 @@ gpio_init:
 	# PC13 es el LED integrado
 	LDR r0, =GPIOC
 	LDR r1, [r0, #GPIO_CRH_OFFSET]
-	LDR r2, =~GPIO_CRH_CNF_MODE_13
-	AND r1, r1, r2
+	BFC r1, #GPIO_CRH_CNF_MODE_13_SHIFT, #4
 	LDR r2, =PC13_CNF_MODE
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRH_OFFSET]
@@ -129,16 +125,16 @@ gpio_init:
 
 .global gpio_set_yellow
 gpio_set_yellow:
-	LDR r1, =0b1111
-	LDR r2, =GPIO_BSRR_13
-	TST r0, r1
+	UBFX r0, r0, #0, #4
+	LDR  r1, =GPIO_BSRR_13
+	TST  r0, r0
 	# Hay que poner PC13 en 0 para encenderlo, no 1
-	BEQ .write_bsrr
-	LSL r2, r2, #GPIO_BSRR_BR_SHIFT
+	BEQ  .write_bsrr
+	LSL  r1, r1, #GPIO_BSRR_BR_SHIFT
 	.write_bsrr:
-	LDR r0, =GPIOC
-	STR r2, [r0, #GPIO_BSRR_OFFSET]
-	BX  lr
+	LDR  r0, =GPIOC
+	STR  r1, [r0, #GPIO_BSRR_OFFSET]
+	BX   lr
 
 .global gpio_set_green
 gpio_set_green:

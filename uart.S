@@ -7,10 +7,11 @@
 .equ USART_DR_OFFSET,  0x04
 .equ USART_BRR_OFFSET, 0x08
 
-.equ USART_CR1_OFFSET, 0x0c
-.equ USART_CR1_TE,     1 << 3
-.equ USART_CR1_TXEIE,  1 << 7
-.equ USART_CR1_UE,     1 << 13
+.equ USART_CR1_OFFSET,      0x0c
+.equ USART_CR1_TE,          1 << 3
+.equ USART_CR1_TXEIE,       1 << 7
+.equ USART_CR1_TXEIE_SHIFT, 7
+.equ USART_CR1_UE,          1 << 13
 
 # El registro BRR contiene una escala fraccional de punto fijo llamada USARTDIV,
 # documentada en p. 617. USARTDIV ajusta el divisor de reloj aplicado a f_PCLK
@@ -101,8 +102,7 @@ uart_isr:
 	# Baja TXEIE (sin esto el ISR entra en bucle por siempre)
 	LDR r0, =USART1
 	LDR r1, [r0, #USART_CR1_OFFSET]
-	LDR r2, =~USART_CR1_TXEIE
-	AND r1, r1, r2
+	BFC r1, #USART_CR1_TXEIE_SHIFT, #1
 	STR r1, [r0, #USART_CR1_OFFSET]
 	BX  lr
 
