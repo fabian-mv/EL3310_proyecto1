@@ -14,8 +14,11 @@
 .equ GPIO_CRH_CNF_MODE_9,  0b1111 << 4
 .equ GPIO_CRH_CNF_MODE_13, 0b1111 << 20
 
+.equ GPIO_IDR_OFFSET,      0x08
+.equ GPIO_IDR_34567_SHIFT, 3
+
 # P. 173
-.equ GPIO_ODR_OFFSET, 0x0C
+.equ GPIO_ODR_OFFSET, 0x0c
 
 # P. 173
 .equ GPIO_BSRR_OFFSET,      0x10
@@ -139,21 +142,46 @@ gpio_set_yellow:
 
 .global gpio_set_green
 gpio_set_green:
-	MVN r1, r0
-	LDR r2, =0b11111
-	AND r0, r0, r2
-	AND r1, r1, r2
-	LSL r0, r0, #GPIO_BSRR_34567_SHIFT
-	LSL r1, r1, #(GPIO_BSRR_34567_SHIFT + GPIO_BSRR_BR_SHIFT)
-	ORR r1, r0, r1
-	LDR r0, =GPIOA
-	STR r1, [r0, #GPIO_BSRR_OFFSET]
-	BX  lr
+	MVN  r1, r0
+	UBFX r0, r0, #0, #5
+	UBFX r1, r1, #0, #5
+	LSL  r0, r0, #GPIO_BSRR_34567_SHIFT
+	LSL  r1, r1, #(GPIO_BSRR_34567_SHIFT + GPIO_BSRR_BR_SHIFT)
+	ORR  r1, r0, r1
+	LDR  r0, =GPIOA
+	STR  r1, [r0, #GPIO_BSRR_OFFSET]
+	BX   lr
 
 .global gpio_isr
 gpio_isr:
-	LDR r0, =EXTI
-	LDR r1, [r0, #EXTI_PR_OFFSET]
-	# Un 1 en cada bitfield baja la línea de interrupción
-	STR r1, [r0, #EXTI_PR_OFFSET]
-	BX  lr
+	PUSH {r4}
+
+	# Banderas de interrupción levantdas
+	LDR  r0, =EXTI
+	LDR  r4, [r0, #EXTI_PR_OFFSET]
+
+	LDR  r0, =GPIOB
+	LDR  r0, [r0, #GPIO_IDR_OFFSET]
+	# Lógica negativa
+	MVN  r0, r0
+	UBFX r0, r0, #GPIO_IDR_34567_SHIFT, #5
+
+	LDR  r1, =stpl_timers
+	.raise_timers:
+	UBFX r2, r0, #0, #1
+	LDR  r3, [r1]
+	ADD  r3, r3, #1
+	CMP  r2, r3
+	BNE  .raise_timers.continue
+	STR  r3, [r1]
+	.raise_timers.continue:
+	ADD  r1, r1, #4
+	LSR  r0, #1
+	TST  r0, r0
+	BNE .raise_timers
+
+	LDR  r0, =EXTI
+	# Un 1 en cada bitfield baja la respectiva línea de interrupción
+	STR  r4, [r0, #EXTI_PR_OFFSET]
+	POP  {r4}
+	BX   lr

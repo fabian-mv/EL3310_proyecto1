@@ -286,14 +286,18 @@ stpl:
 stpl_last: 
     .space 4		@ Reserve 4 bytes for memory block “stpl_last”
 
-stpl_n_tmr: 
-    .space 4		@ Reserve 4 byte for memory block “stpl_n_tmr”
-stpl_o_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_o_tmr”
-stpl_s_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_s_tmr”
+# *********************************************************************
+# No cambiar el orden de estas cinco variables, hay código que lo asume
+# *********************************************************************
+.global stpl_timers
+stpl_timers:
 stpl_e_tmr:
     .space 4		@ Reserve 4 byte for memory block “stpl_e_tmr”
+stpl_s_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_s_tmr”
+stpl_o_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_o_tmr”
+stpl_n_tmr: 
+    .space 4		@ Reserve 4 byte for memory block “stpl_n_tmr”
 stpl_p_tmr:
     .space 4		@ Reserve 4 byte for memory block “stpl_p_tmr”
-
