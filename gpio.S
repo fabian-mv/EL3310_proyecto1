@@ -6,7 +6,6 @@
 # P. 171
 .equ GPIO_CRL_OFFSET,         0x00
 .equ GPIO_CRL_CNF_MODE_34567, 0xfff << 12
-.equ GPIO_CRL_CNF_MODE_4567,  0xff  << 16
 
 # P. 172
 .equ GPIO_CRH_OFFSET,      0x04
@@ -17,11 +16,11 @@
 .equ GPIO_ODR_OFFSET, 0x0C
 
 # P. 173
-.equ GPIO_BSRR_OFFSET,     0x10
-.equ GPIO_BSRR_4567,       0b1111 << 4
-.equ GPIO_BSRR_13,         1      << 13
-.equ GPIO_BSRR_4567_SHIFT, 4
-.equ GPIO_BSRR_BR_SHIFT,   16
+.equ GPIO_BSRR_OFFSET,      0x10
+.equ GPIO_BSRR_34567,       0b11111 << 3
+.equ GPIO_BSRR_13,          1       << 13
+.equ GPIO_BSRR_34567_SHIFT, 3
+.equ GPIO_BSRR_BR_SHIFT,    16
 
 # p. 171
 # PA9 en push-pull alternate function output.
@@ -29,7 +28,7 @@
 # PB3-PB7 en pull-up input
 # PC13 en push-pull output
 .equ PA9_CNF_MODE,     0b1010  << 4
-.equ PA4567_CNF_MODE,  0x2222  << 16
+.equ PA34567_CNF_MODE, 0x22222 << 12
 .equ PB34567_CNF_MODE, 0x88888 << 12
 .equ PB34567_ODR,      0b11111 << 3
 .equ PC13_CNF_MODE,    0b0010  << 20
@@ -39,14 +38,14 @@ gpio_init:
 	# PA4-PA7 son salidas de LEDs
 	LDR r0, =GPIOA
 	LDR r1, [r0, #GPIO_CRL_OFFSET]
-	LDR r2, =~GPIO_CRL_CNF_MODE_4567
+	LDR r2, =~GPIO_CRL_CNF_MODE_34567
 	AND r1, r1, r2
-	LDR r2, =PA4567_CNF_MODE
+	LDR r2, =PA34567_CNF_MODE
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRL_OFFSET]
 
 	# Apaga los LEDs externos
-	LDR r1, =(GPIO_BSRR_4567 << GPIO_BSRR_BR_SHIFT)
+	LDR r1, =(GPIO_BSRR_34567 << GPIO_BSRR_BR_SHIFT)
 	STR r1, [r0, #GPIO_BSRR_OFFSET]
 
 	# Configura PA9 (TX) como alternate output push-pull. PA10 (RX)
@@ -106,8 +105,8 @@ gpio_set_green:
 	LDR r2, =0b11111
 	AND r0, r0, r2
 	AND r1, r1, r2
-	LSL r0, r0, #GPIO_BSRR_4567_SHIFT
-	LSL r1, r1, #(GPIO_BSRR_4567_SHIFT + GPIO_BSRR_BR_SHIFT)
+	LSL r0, r0, #GPIO_BSRR_34567_SHIFT
+	LSL r1, r1, #(GPIO_BSRR_34567_SHIFT + GPIO_BSRR_BR_SHIFT)
 	ORR r1, r0, r1
 	LDR r0, =GPIOA
 	STR r1, [r0, #GPIO_BSRR_OFFSET]
