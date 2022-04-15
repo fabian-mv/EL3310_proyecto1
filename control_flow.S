@@ -207,33 +207,33 @@ check_pedestrian:
 # Actualiza los LEDS con la información más reciente de la situación de la via 
 change_leds:
 
-    PUSH {lr}
+    PUSH {r5,r6,lr}
 
     LDR r1, =stpl
     LDR r0, =stpl_last
-    LDR r2, [r1]
-    LDR r3, [r0]
-    CMP r2, r3
+    LDR r5, [r1]
+    LDR r6, [r0]
+    CMP r5, r6
     BNE .gpio_set
     MOV r0, #5
     BL wait
     POP {pc}
 
     .gpio_set:
-    MOV r0, r3
+    MOV r0, r6
     BL gpio_set_yellow
     MOV r0, #0
     BL gpio_set_green
     MOV r0, #2
     BL  wait 
-    MOV r0, r2
+    MOV r0, r5
     BL  gpio_set_green 
     MOV r0, #0
     BL gpio_set_yellow
     MOV r0, #3
     BL  wait
 
-    POP {pc}
+    POP {r5,r6,pc}
 
 # Ciclo de espera de la luz en verde. Actualiza los contadores cada 1s
 wait:
