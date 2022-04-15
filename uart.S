@@ -9,6 +9,7 @@
 
 .equ USART_CR1_OFFSET, 0x0c
 .equ USART_CR1_TE,     1 << 3
+.equ USART_CR1_TXEIE,  1 << 7
 .equ USART_CR1_UE,     1 << 13
 
 # El registro BRR contiene una escala fraccional de punto fijo llamada USARTDIV,
@@ -65,20 +66,44 @@ uart_send_str:
 
 .global uart_send_char
 uart_send_char:
-	LDR r1, =0xff
-	AND r0, r0, r1
-	LDR r1, =usart_dr_mask
-	LDR r1, [r1]
-	ORR r0, r0, r1
+	PUSH {r4}
+
+	LDR  r1, =0xff
+	AND  r0, r0, r1
+	LDR  r1, =usart_dr_mask
+	LDR  r1, [r1]
+	ORR  r0, r0, r1
 
 	LDR r1, =USART1
 	LDR r2, =USART_SR_TXE
+	LDR r4, =USART_CR1_TXEIE
+	# TXE indica que se puede escribir al registro de salida.
+	# TXEIE se levanta en caso que TXE no esté levantada, lo
+	# cual permite al core suspender (WFI) hasta que el ISR
+	# baje TXEIE, punto para el cual TXE debe estar levantada.
 	.wait_for_txe:
 	LDR r3, [r1, #USART_SR_OFFSET]
 	TST r3, r2
-	BEQ .wait_for_txe
+	BNE .wait_for_txe.end
+	LDR r3, [r1, #USART_CR1_OFFSET]
+	ORR r3, r4
+	STR r3, [r1, #USART_CR1_OFFSET]
+	#WFI
+	B   .wait_for_txe
+	.wait_for_txe.end:
 
 	STR r0, [r1, #USART_DR_OFFSET]
+	POP {r4}
+	BX  lr
+
+.global uart_isr
+uart_isr:
+	# Baja TXEIE (sin esto el ISR entra en bucle por siempre)
+	LDR r0, =USART1
+	LDR r1, [r0, #USART_CR1_OFFSET]
+	LDR r2, =~USART_CR1_TXEIE
+	AND r1, r1, r2
+	STR r1, [r0, #USART_CR1_OFFSET]
 	BX  lr
 
 .data

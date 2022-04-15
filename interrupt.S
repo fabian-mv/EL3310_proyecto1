@@ -57,6 +57,12 @@ exti4_handler:
 exti9_5_handler:
 	.word gpio_isr + 1
 
+# USART1 en 0x000000D4 (tabla 63 cont.)
+.fill (0x000000d4 - (. - stack_init)) / 4, 4, 0
+
+usart1_handle:
+	.word uart_isr + 1
+
 #ifdef QEMU
 	# Vector máximo es 0x0000_0130, p. 133 de RM0041
 	.fill (0x00000134 - (. - stack_init)) / 4, 4, 0
