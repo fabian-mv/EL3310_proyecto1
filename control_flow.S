@@ -76,6 +76,7 @@ main:
     LDR r5, [r0]
 
     B .main_loop
+
 init_splts:
     MOV r0, #0
     LDR r1, =stpl
@@ -89,19 +90,19 @@ init_splts:
 # Inicia todos los timers con un valor incial de 0
 init_timers:
 
-    MOV r0, #39
+    MOV r0, #0
     LDR r1,=stpl_n_tmr
     STR r0, [r1]
-    MOV r0, #38
+    MOV r0, #0
     LDR r1,=stpl_o_tmr
     STR r0, [r1]
-    MOV r0, #37
+    MOV r0, #0
     LDR r1,=stpl_s_tmr
     STR r0, [r1]
-    MOV r0, #36
+    MOV r0, #0
     LDR r1,=stpl_e_tmr
     STR r0, [r1]
-    MOV r0, #20
+    MOV r0, #0
     LDR r1,=stpl_p_tmr
     STR r0, [r1]
     BX  lr
@@ -214,19 +215,25 @@ change_leds:
     LDR r3, [r0]
     CMP r2, r3
     BNE .gpio_set
-    MOV r0, #0
+    MOV r0, #5
+    BL wait
+    POP {pc}
+
     .gpio_set:
-    BL  gpio_set_yellow
+    MOV r0, r3
+    BL gpio_set_yellow
+    MOV r0, #0
+    BL gpio_set_green
     MOV r0, #2
-    BL  wait
-    LDR r0, =stpl
-    BL  gpio_set_green
+    BL  wait 
+    MOV r0, r2
+    BL  gpio_set_green 
+    MOV r0, #0
+    BL gpio_set_yellow
     MOV r0, #3
     BL  wait
 
     POP {pc}
-
-
 
 # Ciclo de espera de la luz en verde. Actualiza los contadores cada 1s
 wait:
