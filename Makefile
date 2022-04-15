@@ -8,7 +8,7 @@ all: firmware
 clean:
 	rm -f firmware *.o
 
-firmware: control_flow.o gpio.o interrupt.o rcc.o start.o systick.o uart.o
+firmware: gpio.o interrupt.o rcc.o start.o stpls.o systick.o uart.o
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
 %.o: %.S

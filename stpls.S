@@ -1,22 +1,41 @@
 .equ E_LIGHT, 1<<0  @ 00001 -> 1
+.equ S_LIGHT, 1<<1  @ 00010 -> 2
 .equ O_LIGHT, 1<<2  @ 00100 -> 4
 .equ N_LIGHT, 1<<3  @ 01000 -> 8
-.equ S_LIGHT, 1<<1  @ 00010 -> 2
 .equ P_LIGHT, 1<<4  @ 10000 -> 16
 
 
 # NOTAS PARA INTERRUPCIONES:
-    # Cuando se toca un boton (cualqueira) este siempre carga 1 en el respectivo stlp_x_tmr
-        ## Esto solo ocurre cuando el timer de es igual a 0. Si no, no hace nada. 
+# Cuando se toca un boton (cualqueira) este siempre carga 1 en el respectivo stlp_x_tmr
+# Esto solo ocurre cuando el timer es igual a 0. Si no, no hace nada. 
+
+
+.global stpls_init
+stpls_init:
+    MOV r0, #0
+    LDR r1, =stpl
+    STR r0, [r1]
+    MOV r0, #0
+    LDR r1, =stpl_last
+    STR r0, [r1]
+
+	# Inicia todos los timers con un valor incial de 0
+    MOV r0, #0
+    LDR r1,=stpl_n_tmr
+    STR r0, [r1]
+    LDR r1,=stpl_o_tmr
+    STR r0, [r1]
+    LDR r1,=stpl_s_tmr
+    STR r0, [r1]
+    LDR r1,=stpl_e_tmr
+    STR r0, [r1]
+    LDR r1,=stpl_p_tmr
+    STR r0, [r1]
+    BX  lr
+
 
 .global main
 main:
-
-    BL init_timers
-    Bl init_splts
-
-    .main_loop:
-
     BL save_last_stpl
     BL check_pedestrian
 
@@ -75,38 +94,7 @@ main:
     LDR r0, =stpl_p_tmr
     LDR r5, [r0]
 
-    B .main_loop
-
-init_splts:
-    MOV r0, #0
-    LDR r1, =stpl
-    STR r0, [r1]
-    MOV r0, #0
-    LDR r1, =stpl_last
-    STR r0, [r1]
-    BX  lr
-    
-
-# Inicia todos los timers con un valor incial de 0
-init_timers:
-
-    MOV r0, #0
-    LDR r1,=stpl_n_tmr
-    STR r0, [r1]
-    MOV r0, #0
-    LDR r1,=stpl_o_tmr
-    STR r0, [r1]
-    MOV r0, #0
-    LDR r1,=stpl_s_tmr
-    STR r0, [r1]
-    MOV r0, #0
-    LDR r1,=stpl_e_tmr
-    STR r0, [r1]
-    MOV r0, #0
-    LDR r1,=stpl_p_tmr
-    STR r0, [r1]
-    BX  lr
-
+    B main
 
 # Incrementa en 1 el valor de un timer especifico
 # Param r0: direccion del timer a incrementar
