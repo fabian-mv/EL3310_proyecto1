@@ -1,20 +1,3 @@
-.data
-stpl: 
-    .space 4		@ Reserve 4 bytes for memory block “stpl”
-stpl_last: 
-    .space 4		@ Reserve 4 bytes for memory block “stpl_last”
-
-stpl_n_tmr: 
-    .space 4		@ Reserve 4 byte for memory block “stpl_n_tmr”
-stpl_o_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_o_tmr”
-stpl_s_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_s_tmr”
-stpl_e_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_e_tmr”
-stpl_p_tmr:
-    .space 4		@ Reserve 4 byte for memory block “stpl_p_tmr”
-
 .equ E_LIGHT, 1<<0  @ 00001 -> 1
 .equ O_LIGHT, 1<<2  @ 00100 -> 4
 .equ N_LIGHT, 1<<3  @ 01000 -> 8
@@ -26,9 +9,73 @@ stpl_p_tmr:
     # Cuando se toca un boton (cualqueira) este siempre carga 1 en el respectivo stlp_x_tmr
         ## Esto solo ocurre cuando el timer de es igual a 0. Si no, no hace nada. 
 
+.global main
+main:
 
-.text
+    BL init_timers
+    Bl init_splts
 
+    .main_loop:
+
+    BL save_last_stpl
+    BL check_pedestrian
+
+    LDR r0, =stpl
+    LDR r1, [r0]
+    CMP r1, #P_LIGHT
+    BEQ .skip_compare
+    
+    # Comparacion N y O 
+    LDR r4, =stpl_n_tmr
+    LDR r0,  [r4]
+    LDR r5, =stpl_o_tmr
+    LDR r1, [r5]
+    BL compare_sptl
+    MOV r6, r1 
+    MOV r2, r0
+
+    # Comparacion S y E
+    LDR r4, =stpl_s_tmr
+    LDR r0, [r4]
+    LDR r5, =stpl_e_tmr
+    LDR r1, [r5]
+    BL compare_sptl 
+    MOV r7, r1
+
+    # Ultima comaparacion
+    MOV r1, r2
+    MOV r2, r6
+    MOV r3, r7
+    BL compare_sptl_final
+
+    LDR r6, =stpl
+    STR r2, [r6]
+
+    BL reset_timers
+
+    .skip_compare:
+
+    LDR r3, =stpl
+    LDR r0, [r3] 
+    LDR r3, =stpl_last
+    LDR r1, [r3] 
+
+    BL change_leds 
+
+
+    # Print light timers
+    LDR r0, =stpl_n_tmr
+    LDR r1, [r0]
+    LDR r0, =stpl_o_tmr
+    LDR r2, [r0]
+    LDR r0, =stpl_s_tmr
+    LDR r3, [r0]
+    LDR r0, =stpl_e_tmr
+    LDR r4, [r0]
+    LDR r0, =stpl_p_tmr
+    LDR r5, [r0]
+
+    B .main_loop
 init_splts:
     MOV r0, #0
     LDR r1, =stpl
@@ -249,71 +296,21 @@ reset_timers:
     STR r2, [r1]
     BX lr
 
-# Bucle principal del semaforo 
-.global _start
-_start:
+.data
 
-    BL init_timers
-    Bl init_splts
+stpl: 
+    .space 4		@ Reserve 4 bytes for memory block “stpl”
+stpl_last: 
+    .space 4		@ Reserve 4 bytes for memory block “stpl_last”
 
-    .main_loop:
+stpl_n_tmr: 
+    .space 4		@ Reserve 4 byte for memory block “stpl_n_tmr”
+stpl_o_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_o_tmr”
+stpl_s_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_s_tmr”
+stpl_e_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_e_tmr”
+stpl_p_tmr:
+    .space 4		@ Reserve 4 byte for memory block “stpl_p_tmr”
 
-    BL save_last_stpl
-    BL check_pedestrian
-
-    LDR r0, =stpl
-    LDR r1, [r0]
-    CMP r1, #P_LIGHT
-    BEQ .skip_compare
-    
-    # Comparacion N y O 
-    LDR r4, =stpl_n_tmr
-    LDR r0,  [r4]
-    LDR r5, =stpl_o_tmr
-    LDR r1, [r5]
-    BL compare_sptl
-    MOV r6, r1 
-    MOV r2, r0
-
-    # Comparacion S y E
-    LDR r4, =stpl_s_tmr
-    LDR r0, [r4]
-    LDR r5, =stpl_e_tmr
-    LDR r1, [r5]
-    BL compare_sptl 
-    MOV r7, r1
-
-    # Ultima comaparacion
-    MOV r1, r2
-    MOV r2, r6
-    MOV r3, r7
-    BL compare_sptl_final
-
-    LDR r6, =stpl
-    STR r2, [r6]
-
-    BL reset_timers
-
-    .skip_compare:
-
-    LDR r3, =stpl
-    LDR r0, [r3] 
-    LDR r3, =stpl_last
-    LDR r1, [r3] 
-
-    BL change_leds 
-
-
-    # Print light timers
-    LDR r0, =stpl_n_tmr
-    LDR r1, [r0]
-    LDR r0, =stpl_o_tmr
-    LDR r2, [r0]
-    LDR r0, =stpl_s_tmr
-    LDR r3, [r0]
-    LDR r0, =stpl_e_tmr
-    LDR r4, [r0]
-    LDR r0, =stpl_p_tmr
-    LDR r5, [r0]
-
-    B .main_loop
