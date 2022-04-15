@@ -203,7 +203,8 @@ wait:
     .sleep:
     @BL  systick_next
     BL  increase_timers
-    SUBS r4, #1
+    SUB r4, #1
+    CMP r4, #0
     BNE .sleep
 
     POP {r4, pc}
