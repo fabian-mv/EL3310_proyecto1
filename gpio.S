@@ -1,6 +1,8 @@
 # Mapa de memoria en p. 51 RM0008
+.equ AFIO,  0x40010000
+.equ EXTI,  0x40010400
 .equ GPIOA, 0x40010800
-.equ GPIOB, 0x40010C00
+.equ GPIOB, 0x40010c00
 .equ GPIOC, 0x40011000
 
 # P. 171
@@ -22,6 +24,21 @@
 .equ GPIO_BSRR_34567_SHIFT, 3
 .equ GPIO_BSRR_BR_SHIFT,    16
 
+# P. 191
+.equ AFIO_EXTICR1_OFFSET, 0x08
+.equ AFIO_EXTICR2_OFFSET, 0x0C
+
+# P. 211
+.equ EXTI_IMR_OFFSET, 0x00
+.equ EXTI_IMR_34567,  0b11111 << 3
+
+# P. 212
+.equ EXTI_FTSR_OFFSET, 0x0C
+.equ EXTI_FTSR_34567,  0b11111 << 3
+
+# P. 213
+.equ EXTI_PR_OFFSET, 0x14
+
 # p. 171
 # PA9 en push-pull alternate function output.
 # PA4-PA7 en push-pull output
@@ -32,6 +49,11 @@
 .equ PB34567_CNF_MODE, 0x88888 << 12
 .equ PB34567_ODR,      0b11111 << 3
 .equ PC13_CNF_MODE,    0b0010  << 20
+
+# Esto pone PB3-PB7 como fuentes de flanco para las interrupciones
+# EXTI3 a EXTI7 respectivamente (p. 191).
+.equ EXTI3_PB,    0b0001 << 12
+.equ EXTI4567_PB, 0x1111
 
 .global gpio_init
 gpio_init:
@@ -80,9 +102,25 @@ gpio_init:
 	ORR r1, r1, r2
 	STR r1, [r0, #GPIO_CRH_OFFSET]
 
-	# Apaga LED integrado 4(esto se hace poniendo PC13 en 1, no 0)
+	# Apaga LED integrado (esto se hace poniendo PC13 en 1, no 0)
 	LDR r1, =GPIO_BSRR_13
-	STR r1, [r0, #GPIO_CRL_OFFSET]
+	STR r1, [r0, #GPIO_BSRR_OFFSET]
+
+	# Asocia líneas de interrupción EXTI3-EXTI7 a GPIOB
+	LDR r0, =AFIO
+	LDR r1, =EXTI3_PB
+	STR r1, [r0, #AFIO_EXTICR1_OFFSET]
+	LDR r1, =EXTI4567_PB
+	STR r1, [r0, #AFIO_EXTICR2_OFFSET]
+
+	# Habilita dichas líneas de interrupción en flanco negativo.
+	# Los botones están conectados en configuración pull-down, por
+	# lo que al presionarlos ocurre un falling edge.
+	LDR r0, =EXTI
+	LDR r1, =EXTI_FTSR_34567
+	STR r1, [r0, #EXTI_FTSR_OFFSET]
+	# EXTI_FTSR_34567 == EXTI_IMR_34567
+	STR r1, [r0, #EXTI_IMR_OFFSET]
 
 	BX  lr
 
@@ -114,4 +152,8 @@ gpio_set_green:
 
 .global gpio_isr
 gpio_isr:
-	BX lr
+	LDR r0, =EXTI
+	LDR r1, [r0, #EXTI_PR_OFFSET]
+	# Un 1 en cada bitfield baja la línea de interrupción
+	STR r1, [r0, #EXTI_PR_OFFSET]
+	BX  lr
