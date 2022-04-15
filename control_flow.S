@@ -202,18 +202,6 @@ check_pedestrian:
     STR r1, [r0] 
 
     BX lr
-    
-# Rutina que se comunica con el microntrolador para actualizar los LEDS 
-# Param: r0: representacion numerica de la luz que va a amarillo
-# gpio_set_yellow:
-    @Aqui va la magia de Soto
-
-
-# Rutina que se comunica con el microntrolador para actualizar los LEDS 
-# Param: r0: representacion numerica de la luz que va a verde
-# gpio_set_green:
-    @Aqui va la magia de Soto
-
 
 # Actualiza los LEDS con la información más reciente de la situación de la via 
 change_leds:
@@ -228,11 +216,11 @@ change_leds:
     BNE .gpio_set
     MOV r0, #0
     .gpio_set:
-    @BL gpio_set_yellow
+    BL  gpio_set_yellow
     MOV r0, #2
     BL  wait
     LDR r0, =stpl
-    @ BL  gpio_set_green
+    BL  gpio_set_green
     MOV r0, #3
     BL  wait
 
@@ -248,7 +236,7 @@ wait:
     MOV r4, r0 
     
     .sleep:
-    @BL  systick_next
+    BL  systick_next
     BL  increase_timers
     SUB r4, #1
     CMP r4, #0
