@@ -110,7 +110,7 @@ increase_timers:
 
     push {r4, lr}
 
-    LDR r4,=stpl_n_tmr
+    LDR r4,=stpl_timers
     .loop:
     LDR r1, [r4]
     CMP r1, #0
