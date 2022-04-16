@@ -10,7 +10,7 @@ nmi_handler:
 	.word 0
 
 hard_fault_handler:
-	.word 0
+	.word hard_fault + 1
 
 mem_manage_handler:
 	.word 0
@@ -70,3 +70,6 @@ usart1_handle:
 	# Vector máximo es 0x0000_012C, p. 133 de RM0008
 	.fill (0x00000130 - (. - stack_init)) / 4, 4, 0
 #endif
+
+hard_fault:
+	B hard_fault
