@@ -39,11 +39,7 @@ main:
     BL save_last_stpl
     BL check_pedestrian
 
-    LDR r0, =stpl
-    LDR r1, [r0]
-    CMP r1, #P_LIGHT
-    BEQ .skip_compare
-    
+
     # Comparacion N y O 
     LDR r4, =stpl_n_tmr
     LDR r0,  [r4]
@@ -71,8 +67,6 @@ main:
     STR r2, [r6]
 
     BL reset_timers
-
-    .skip_compare:
 
     LDR r3, =stpl
     LDR r0, [r3] 
