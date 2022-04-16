@@ -4,6 +4,7 @@
 .equ GPIOA, 0x40010800
 .equ GPIOB, 0x40010c00
 .equ GPIOC, 0x40011000
+.equ NVIC,  0xE000E100
 
 # P. 171
 .equ GPIO_CRL_OFFSET,               0x00
@@ -41,6 +42,11 @@
 
 # P. 213
 .equ EXTI_PR_OFFSET, 0x14
+
+.equ NVIC_ISER0_OFFSET,  0x00
+.equ NVIC_ISER0_EXTI3,   1 << 9
+.equ NVIC_ISER0_EXTI4,   1 << 10
+.equ NVIC_ISER0_EXTI9_5, 1 << 23
 
 # p. 171
 # PA9 en push-pull alternate function output.
@@ -121,6 +127,12 @@ gpio_init:
 	# EXTI_FTSR_34567 == EXTI_IMR_34567
 	STR r1, [r0, #EXTI_IMR_OFFSET]
 
+	# Permite las líneas de IRQ en el NVIC
+	LDR r0, =NVIC
+	LDR r1, [r0, #NVIC_ISER0_OFFSET]
+	LDR r2, =(NVIC_ISER0_EXTI3 | NVIC_ISER0_EXTI4 | NVIC_ISER0_EXTI9_5)
+	ORR r1, r1, r2
+	STR r1, [r0, #NVIC_ISER0_OFFSET]
 	BX  lr
 
 .global gpio_set_yellow
