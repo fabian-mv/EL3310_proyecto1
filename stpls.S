@@ -205,7 +205,7 @@ change_leds:
     BNE .gpio_set
     MOV r0, #5
     BL wait
-    POP {pc}
+    POP {r5, r6, pc}
 
     .gpio_set:
     MOV r0, r6
