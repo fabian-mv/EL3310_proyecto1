@@ -178,9 +178,6 @@ check_pedestrian:
     CMP r1, #20 
     LDR r0, =stpl
     BHS .set_p_sptl
-    MOV r1, #0
-    STR r1, [r0]
-    
     BX lr
 
     .set_p_sptl:
