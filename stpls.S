@@ -155,7 +155,7 @@ compare_sptl_final:
     MOV r2, #P_LIGHT
     BX  lr
 
-#
+# Guarda el estado actual del semaforo antes del nuevo cambio 
 save_last_stpl:
 
     LDR r0, =stpl
